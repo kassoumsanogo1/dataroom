@@ -10,6 +10,8 @@ from langchain.prompts import ChatPromptTemplate
 from langchain.output_parsers import ResponseSchema, StructuredOutputParser
 from sentence_transformers import SentenceTransformer
 import subprocess
+from PIL import Image
+
 
 class DocumentClassifier:
     def __init__(self, base_path: str, groq_api_key: str):
@@ -93,7 +95,53 @@ class DocumentClassifier:
             return ' '.join(words[:max_words])
         return text
 
-    
+
+    def is_pdf_text_readable(self, pdf_path: str) -> bool:
+        """
+        Vérifie si le PDF contient du texte lisible.
+        
+        :param pdf_path: Chemin du fichier PDF.
+        :return: True si le texte est lisible, False sinon.
+        """
+        try:
+            doc = fitz.open(pdf_path)
+            for page in doc:
+                if page.get_text().strip():  # Si une page contient du texte
+                    return True
+            print("aucun text lisible trouvé")
+            return False  # Aucun texte lisible trouvé
+        except Exception as e:
+            print(f"Erreur lors de la vérification du texte lisible dans le PDF : {str(e)}")
+            return False
+
+
+
+    def convert_pdf_page_to_image(self, pdf_path: str, output_image_path: str, dpi: int = 200) -> bool:
+        """
+        Convertit la première page d'un PDF en image.
+        
+        :param pdf_path: Chemin du fichier PDF.
+        :param output_image_path: Chemin de sauvegarde de l'image générée.
+        :param dpi: Résolution en DPI pour l'image.
+        :return: True si la conversion réussit, False sinon.
+        """
+        try:
+            doc = fitz.open(pdf_path)
+            if len(doc) == 0:
+                print(f"Le PDF {pdf_path} est vide.")
+                return False
+            
+            page = doc[0]  # Première page
+            pix = page.get_pixmap(dpi=dpi)  # Convertir en image avec la résolution spécifiée
+            image = Image.frombytes("RGB", [pix.width, pix.height], pix.samples)
+            image.save(output_image_path, "JPEG")  # Sauvegarder comme image JPEG
+            doc.close()
+            return True
+        except Exception as e:
+            print(f"Erreur lors de la conversion du PDF en image : {str(e)}")
+            return False
+
+
 
     def extract_text_from_pdf(self, file_path: str, max_pages: int = 20, max_words: int = 10000) -> str:
         """Extrait le texte des premières pages d'un PDF jusqu'à un certain nombre de mots."""
@@ -110,6 +158,9 @@ class DocumentClassifier:
         except Exception as e:
             print(f"Erreur lors de la lecture du PDF {file_path}: {str(e)}")
             return ""
+        
+
+    
 
 
     def extract_text_from_docx(self, file_path: str, max_pages: int = 20, max_words: int = 10000) -> str:
@@ -190,8 +241,24 @@ class DocumentClassifier:
 
             # Extraction du texte selon le format
             text = ""
+            #if file_path.suffix.lower() == '.pdf':
+            #    text = self.extract_text_from_pdf(str(file_path), max_pages=max_pages, max_words=max_words)
+
             if file_path.suffix.lower() == '.pdf':
-                text = self.extract_text_from_pdf(str(file_path), max_pages=max_pages, max_words=max_words)
+                # Vérifie si le PDF est lisible
+                if self.is_pdf_text_readable(str(file_path)):
+                    text = self.extract_text_from_pdf(str(file_path), max_pages=max_pages, max_words=max_words)
+                else:
+                    # Conversion de la première page en image
+                    temp_image_path = str(file_path.with_suffix(".jpg"))
+                    if self.convert_pdf_page_to_image(str(file_path), temp_image_path):
+                        print("conversion terminée")
+                        text = self.extract_from_image(str(temp_image_path))
+                        #os.remove(temp_image_path)  # Supprime l'image temporaire après extraction
+                    else:
+                        print(f"Impossible de traiter le PDF scanné : {file_path}")
+                        return None
+
             elif file_path.suffix.lower() in ['.docx', '.doc']:
                 text = self.extract_text_from_docx(str(file_path), max_pages=max_pages, max_words=max_words)
             elif file_path.suffix.lower() in ['.png', '.jpg']:
@@ -229,12 +296,13 @@ class DocumentClassifier:
             return None
 
 
+   
     def process_directory(self, directory_path: str):
         """Traite tous les documents dans un répertoire."""
         directory = Path(directory_path)
         results = []
         for file_path in directory.glob("*.*"):
-            if file_path.suffix.lower() in ['.pdf', '.docx', '.doc']:
+            if file_path.suffix.lower() in ['.pdf', '.docx', '.doc', '.png', '.jpg']:
                 result = self.process_document(str(file_path))
                 if result:
                     results.append({
@@ -249,7 +317,7 @@ classifier = DocumentClassifier("dataroom",groq_api_key)
 
 # Traitement d'un seul document
 #classifier.process_document("dataset/trader-joes-receipt.png")
-classifier.process_document("dataset/mur.jpg")
+classifier.process_document("dataset/MAE.pdf")
 
 # Traitement d'un dossier complet
 #classifier.process_directory("dataset")
