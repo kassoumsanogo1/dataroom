@@ -1,15 +1,11 @@
-import os
-from key import groq_api_key
 from pathlib import Path
 import shutil
-from typing import List, Optional
-import fitz  
-import docx  
+from typing import Optional, Dict
 from langchain_groq import ChatGroq
 from langchain.prompts import ChatPromptTemplate
 from langchain.output_parsers import ResponseSchema, StructuredOutputParser
-from sentence_transformers import SentenceTransformer
-import subprocess
+from .file_handler import DocumentExtractor
+from .text_processing import TextProcessor
 
 class DocumentClassifier:
     def __init__(self, base_path: str, groq_api_key: str):
@@ -60,92 +56,7 @@ class DocumentClassifier:
         ])
 
          # Initialisation du modèle SentenceTransformer
-        self.summary_model = SentenceTransformer('all-MiniLM-L6-v2')
-
-
-    def summarize_text(self, text: str, max_length: int = 1000) -> str:
-        """Génère un résumé du texte en utilisant SentenceTransformer."""
-        try:
-            sentences = text.split('. ')
-            if len(sentences) <= max_length:
-                return text  # Pas de résumé nécessaire
-
-            embeddings = self.summary_model.encode(sentences, convert_to_tensor=True)
-            # Classement basé sur les scores d'importance
-            scores = embeddings.mean(dim=1).cpu().numpy()
-            ranked_sentences = sorted(
-                zip(sentences, scores),
-                key=lambda x: x[1],
-                reverse=True
-            )
-            summarized = ' '.join([s[0] for s in ranked_sentences[:max_length]])
-            return summarized
-        except Exception as e:
-            print(f"Erreur lors du résumé: {str(e)}")
-            return text
-            
-
-    
-    def limit_text_length(text: str, max_words: int) -> str:
-        """Limite le texte à un certain nombre de mots."""
-        words = text.split()
-        if len(words) > max_words:
-            return ' '.join(words[:max_words])
-        return text
-
-    
-
-    def extract_text_from_pdf(self, file_path: str, max_pages: int = 20, max_words: int = 10000) -> str:
-        """Extrait le texte des premières pages d'un PDF jusqu'à un certain nombre de mots."""
-        try:
-            doc = fitz.open(file_path)
-            text = ""
-            for page_num in range(min(max_pages, len(doc))):
-                if len(text.split()) >= max_words:
-                    break
-                text += doc[page_num].get_text()
-            doc.close()
-            return text
-            #return limit_text_length(text, max_words)
-        except Exception as e:
-            print(f"Erreur lors de la lecture du PDF {file_path}: {str(e)}")
-            return ""
-
-
-    def extract_text_from_docx(self, file_path: str, max_pages: int = 20, max_words: int = 10000) -> str:
-        """Extrait le texte des premières pages d'un document Word jusqu'à un certain nombre de mots."""
-        try:
-            doc = docx.Document(file_path)
-            paragraphs_per_page = 3
-            max_paragraphs = max_pages * paragraphs_per_page
-            text = "\n".join([p.text for p in doc.paragraphs[:max_paragraphs]])
-            return text
-            #return limit_text_length(text, max_words)
-        except Exception as e:
-            print(f"Erreur lors de la lecture du document Word {file_path}: {str(e)}")
-            return ""
-        
-
-    def extract_from_image(self,image_path : str):
-        """
-        Appelle un script JavaScript d'OCR pour extraire du texte à partir d'une image.
-
-        :param image_path: Chemin vers l'image à analyser.
-        :return: Texte extrait de l'image ou un message d'erreur.
-        """
-        script_path = "./ocr-extraction/llama-ocr.js"  # Chemin vers le script JS
-        try:
-            # Appelle la fonction pour exécuter le script JS avec le chemin de l'image en argument
-            result = subprocess.run(
-                ["node", script_path, image_path],
-                capture_output=True,
-                text=True,
-                check=True
-            )
-            text = result.stdout.strip()
-            return text  # Retourne le texte extrait (sortie standard)
-        except subprocess.CalledProcessError as e:
-            return f"Erreur lors de l'extraction de texte : {e.stderr.strip()}"
+        #self.summary_model = SentenceTransformer('all-MiniLM-L6-v2')
 
     def classify_text(self, text: str) -> dict:
         """Classifie le texte en utilisant Groq."""
@@ -158,7 +69,7 @@ class DocumentClassifier:
                 }
             
              # Résumer le texte
-            summarized_text = self.summarize_text(text)
+            summarized_text = TextProcessor.summarize_text(self, text, max_length=1000)
 
             # Préparation du prompt
             prompt = self.prompt_template.format_messages(
@@ -180,7 +91,7 @@ class DocumentClassifier:
                 "explanation": "Erreur de classification"
             }
 
-    def process_document(self, file_path: str, max_pages: int = 20, max_words: int = 10000) -> Optional[dict]:
+    def process_document(self, file_path: str, max_pages: int = 10, max_words: int = 10000) -> Optional[Dict]:
         """Traite un document et le déplace dans la catégorie appropriée."""
         try:
             file_path = Path(file_path)
@@ -191,11 +102,9 @@ class DocumentClassifier:
             # Extraction du texte selon le format
             text = ""
             if file_path.suffix.lower() == '.pdf':
-                text = self.extract_text_from_pdf(str(file_path), max_pages=max_pages, max_words=max_words)
+                text = DocumentExtractor.extract_text_from_pdf(str(file_path), max_pages=max_pages, max_words=max_words)
             elif file_path.suffix.lower() in ['.docx', '.doc']:
-                text = self.extract_text_from_docx(str(file_path), max_pages=max_pages, max_words=max_words)
-            elif file_path.suffix.lower() in ['.png', '.jpg']:
-                text = self.extract_from_image(str(file_path))
+                text = DocumentExtractor.extract_text_from_docx(str(file_path), max_pages=max_pages, max_words=max_words)
             else:
                 print(f"Format de fichier non supporté: {file_path.suffix}")
                 return None
@@ -228,9 +137,8 @@ class DocumentClassifier:
             print(f"Erreur lors du traitement du document {file_path}: {str(e)}")
             return None
 
-
     def process_directory(self, directory_path: str):
-        """Traite tous les documents dans un répertoire."""
+        """Processes all documents in a directory."""
         directory = Path(directory_path)
         results = []
         for file_path in directory.glob("*.*"):
@@ -242,13 +150,3 @@ class DocumentClassifier:
                         "classification": result
                     })
         return results
-    
-
-# Initialisation du classificateur
-classifier = DocumentClassifier("dataroom",groq_api_key)
-
-# Traitement d'un seul document
-classifier.process_document("dataset/trader-joes-receipt.png")
-
-# Traitement d'un dossier complet
-#classifier.process_directory("dataset")
