@@ -212,15 +212,15 @@ class DocumentClassifier:
             # Déplacement du fichier
             destination = self.base_path / category / file_path.name
 
-            #pour déplacer
+            #to move use this
             #shutil.move(str(file_path), str(destination))
 
-            #pour copier
+            #to copy use this
             shutil.copy2(str(file_path), str(destination))
             
             print(f"Document {file_path.name} classé dans la catégorie: {category}")
             print(f"Explication: {classification_result['explanation']}")
-            print(f"Confiance: {classification_result['confidence']}")
+            print(f"Confidence: {classification_result['confidence']}")
             
             return classification_result
 
@@ -248,7 +248,8 @@ class DocumentClassifier:
 classifier = DocumentClassifier("dataroom",groq_api_key)
 
 # Traitement d'un seul document
-classifier.process_document("dataset/trader-joes-receipt.png")
+#classifier.process_document("dataset/trader-joes-receipt.png")
+classifier.process_document("dataset/mur.jpg")
 
 # Traitement d'un dossier complet
 #classifier.process_directory("dataset")
