@@ -1,7 +1,5 @@
 import fitz
 import docx
-from pathlib import Path
-from typing import Optional
 import subprocess
 
 class DocumentExtractor:

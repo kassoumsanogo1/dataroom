@@ -1,21 +1,3 @@
-// ocr.js
-/* import { ocr } from 'llama-ocr';
-
-
-async function runOCR() {
-    const markdown = await ocr({
-        //filePath: "https://github.com/user-attachments/assets/8138276f-a896-4c60-a8ca-4522054f06d4",
-        filePath: "./trader-joes-receipt.png",
-        //filePath: "mur.JPG",
-        apiKey: process.env.TOGETHER_API_KEY
-    });
-
-    console.log(markdown);
-}
-//runOCR;
-runOCR().catch(console.error); */
-
-
 import { ocr } from 'llama-ocr';
 
 async function runOCR(filePath) {
@@ -39,3 +21,21 @@ async function runOCR(filePath) {
 // Récupération du chemin d'image depuis les arguments de la ligne de commande
 const imagePath = process.argv[2]; // 3e élément du tableau `process.argv` (après "node" et le script)
 runOCR(imagePath).catch(console.error);
+
+
+// ocr.js
+/* import { ocr } from 'llama-ocr';
+
+
+async function runOCR() {
+    const markdown = await ocr({
+        //filePath: "https://github.com/user-attachments/assets/8138276f-a896-4c60-a8ca-4522054f06d4",
+        filePath: "./trader-joes-receipt.png",
+        //filePath: "mur.JPG",
+        apiKey: process.env.TOGETHER_API_KEY
+    });
+
+    console.log(markdown);
+}
+//runOCR;
+runOCR().catch(console.error); */

@@ -102,13 +102,20 @@ Installez-les via :
 pip install -r requirements.txt
 ```
 
-## 📝 Exemple de Résultat
+## 📝 Exemple de Résultat pour pdf normal et pdf scanné
 
 Un exemple de classification d'un document "Contrat" :
 ```plaintext
 Document Tuto-contrat.pdf classé dans la catégorie: contracts
-Explication: Ce document contient des termes juridiques relatifs à un contrat.
-Confiance: 0.92
+Explanation: Ce document contient des termes juridiques relatifs à un contrat.
+Confidence: 0.92
+
+aucun text lisible trouvé
+Extraction terminée
+Analyse du document scanné en cours
+Document MAE.pdf classé dans la catégorie: others
+Explanation: The document content appears to be related to a leadership analysis, discussing topics such as leadership behavior, soft skills, and employee engagement. It includes academic references and theoretical concepts, suggesting an educational or research-oriented context. This does not fit into contracts, personal documents, or food-related categories, so it is classified as 'Others'.
+Confidence: 0.9
 ```
 
 ## 📈 Améliorations futures
