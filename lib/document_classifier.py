@@ -161,7 +161,8 @@ class DocumentClassifier:
                     # Conversion de la première page en image
                     temp_image_path = str(file_path.with_suffix(".jpg"))
                     if self.convert_pdf_page_to_image(str(file_path), temp_image_path):
-                        print("conversion terminée")
+                        print("Extraction terminée")
+                        print("Analyse du document scanné en cours")
                         text = DocumentExtractor.extract_from_image(str(temp_image_path))
                         #os.remove(temp_image_path)  # Supprime l'image temporaire après extraction
                     else:
