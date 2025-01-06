@@ -158,8 +158,6 @@ class DocumentClassifier:
         except Exception as e:
             print(f"Erreur lors de la lecture du PDF {file_path}: {str(e)}")
             return ""
-        
-
     
 
 

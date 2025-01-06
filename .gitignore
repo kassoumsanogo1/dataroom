@@ -3,3 +3,5 @@ key.py
 __pycache__/
 *.pyc
 .DS_Store/
+dataroom_launcher.py
+multimodal_dataroom.py
