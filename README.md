@@ -104,7 +104,7 @@ pip install -r requirements.txt
 
 ## 📝 Exemple de Résultat pour pdf normal et pdf scanné
 
-Un exemple de classification d'un document "Contrat" :
+Un exemple de classification d'un document "Contrat" et d'un cours scanné :
 ```plaintext
 Document Tuto-contrat.pdf classé dans la catégorie: contracts
 Explanation: Ce document contient des termes juridiques relatifs à un contrat.
