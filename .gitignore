@@ -5,6 +5,6 @@ __pycache__/
 .DS_Store/
 dataroom_launcher.py
 multimodal_dataroom.py
-*/DS_Store
-DS_Store
+*/.DS_Store
+.DS_Store
 ocr-extraction/
