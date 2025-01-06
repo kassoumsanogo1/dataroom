@@ -2,7 +2,7 @@
 
 ## 📜 Description
 
-Ce projet propose une **Data Room intelligente** qui utilise l'intelligence artificielle pour classifier automatiquement des documents dans des catégories prédéfinies, à partir de leur contenu. Il prend en charge les formats **PDF** et **Word** et inclut les fonctionnalités suivantes :
+Ce projet propose une **Data Room intelligente** qui utilise l'intelligence artificielle pour classifier automatiquement des documents dans des catégories prédéfinies, à partir de leur contenu. Il prend en charge les formats **PDF**, **DOC**, **DOCX**, **PNG**, **JPG** et **PPTX** et inclut les fonctionnalités suivantes :
 
 - 🗂️ Classification automatique des documents dans les catégories :
   - **Contracts** (Contrats)
@@ -10,14 +10,14 @@ Ce projet propose une **Data Room intelligente** qui utilise l'intelligence arti
   - **Food** (Documents relatifs à l'alimentation)
   - **Others** (Autres documents)
 - 🧠 Utilisation d'un modèle NLP avancé pour analyser et classer les documents.
-- ✂️ Résumé automatique des documents pour une classification rapide et efficace.
-- 📄 Prise en charge des formats **PDF** et **DOCX**.
+- ✂️ Résumé automatique des documents par sentence transformers pour une classification rapide et efficace.
+- 📄 Prise en charge des formats **PDF**, **DOC**, **DOCX**, **PNG**, **JPG** et **PPTX**.
 - 📋 Copie des documents classés dans des sous-dossiers spécifiques (possibilité de déplacer en décommentez une ligne).
 
 ## 🛠️ Fonctionnalités
 
 1. **Extraction de texte** 📖 :
-   - Lecture des premières pages des documents **PDF** et **Word**.
+   - Lecture des premières pages des documents.
    - Limitation du texte extrait pour optimiser la classification.
 
 2. **Résumé des documents** ✍️ :
