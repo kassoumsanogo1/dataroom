@@ -44,7 +44,7 @@ class DocumentExtractor:
         :param image_path: Chemin vers l'image à analyser.
         :return: Texte extrait de l'image ou un message d'erreur.
         """
-        script_path = "./ocr-extraction/llama-ocr.js"  # Chemin vers le script JS
+        script_path = "./service/llama-ocr.js"  # Chemin vers le script JS
         try:
             # Appelle la fonction pour exécuter le script JS avec le chemin de l'image en argument
             result = subprocess.run(
