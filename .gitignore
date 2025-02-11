@@ -8,3 +8,5 @@ multimodal_dataroom.py
 */.DS_Store
 .DS_Store
 ocr-extraction/
+dataset/Test_Covid.pdf
+dataset/Test_Covid.jpg

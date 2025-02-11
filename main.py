@@ -3,7 +3,6 @@ from pathlib import Path
 from lib.document_classifier import DocumentClassifier
 
 def main():
-    # Get GROQ API key from environment variable or import from key file
 
     # Initialize classifier
     base_path = Path("dataroom")
