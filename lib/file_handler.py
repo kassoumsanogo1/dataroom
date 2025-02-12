@@ -52,6 +52,7 @@ class DocumentExtractor:
                 check=True
             )
             text = result.stdout.strip()
+            print(f"Texte extrait de l'image : {text}")
             return text  # Retourne le texte extrait (sortie standard)
         except subprocess.CalledProcessError as e:
             return f"Erreur lors de l'extraction de texte : {e.stderr.strip()}"

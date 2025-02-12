@@ -118,7 +118,7 @@ class DocumentClassifier:
                 }
             
              # Résumer le texte
-            summarized_text = TextProcessor.summarize_text(self, text, max_length=1000)
+            summarized_text = TextProcessor.summarize_text(self, text, max_length=2000)
 
             # Préparation du prompt
             prompt = self.prompt_template.format_messages(
